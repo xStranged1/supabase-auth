@@ -14,6 +14,7 @@ function App() {
 
   async function getCountries() {
     const { data } = await supabase.from("countries").select();
+    const { users } = await supabase.schema("auth").from("users").select();
     setCountries(data);
   }
 
