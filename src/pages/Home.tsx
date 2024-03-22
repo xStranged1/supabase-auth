@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
+import { log } from "console";
  
 const formSchema = z.object({
   username: z.string().min(2, {
@@ -18,17 +19,15 @@ const formSchema = z.object({
 export default function Home({session, supabase}) {
 
     const [users, setUsers] = useState([])
-    const [defaultEmail, setDefaultEmail] = useState("")
-    const [defaultUsername, setDefaultUsername] = useState("")
 
     useEffect(() => {
+        console.log('useEffect home');
+        
         async function getUsers(){
-            const { users } = await supabase.from("countries").select()
-            setUsers(users)
+            const { data, error } = await supabase.from("users").select();
+            setUsers(data)
         }
         getUsers()
-        console.log(session);
-        
     },[])
   
 
@@ -47,14 +46,18 @@ export default function Home({session, supabase}) {
   function onSubmit(values: z.infer<typeof formSchema>) {
     // Do something with the form values.
     // ✅ This will be type-safe and validated.
-    let userID = session.user.id
     const {username, email} = values
     let user = {
-        id: userID,
         username: username,
         email: email
     }
-    supabase.from("users").insert(user).then((res)=>console.log(res))
+    async function createUser(){
+        const { error } = await supabase
+        .from('users')
+        .insert(user)
+        return error
+    }
+    const error = createUser()
 
   }
 
@@ -107,9 +110,14 @@ export default function Home({session, supabase}) {
 return (
 
     <>
-    <RegisterUser />
-    <Button onClick={()=>supabase.auth.signOut()}>LogOut</Button>
-
+        {users && (
+            users.map((user, key)=>(
+                <h2 key={key} >{user.username}</h2>
+            )
+            )
+        )}
+        <RegisterUser />
+        <Button onClick={()=>supabase.auth.signOut()}>LogOut</Button>
     </>
 
     
