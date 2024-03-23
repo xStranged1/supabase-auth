@@ -6,14 +6,9 @@ import { supabase } from "./utils/supabase"
 import Home from './pages/Home'
 
 
-
-
-
-
 export default function App() {
-  const [session, setSession] = useState(null)
+  const [session, setSession] = useState()
   const [users, setUsers] = useState([])
-
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
